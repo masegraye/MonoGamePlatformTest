@@ -44,4 +44,5 @@ type PlatformerGame () as x =
         WorldObjects.Value
         |> List.iter DrawActor'
         spriteBatch.End()
+
         ()
