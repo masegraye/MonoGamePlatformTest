@@ -2,8 +2,11 @@
 
 open Microsoft.Xna.Framework
 open Microsoft.Xna.Framework.Graphics
+open Microsoft.Xna.Framework.Input
 
 open MBPlat.Actors
+open MBPlat.Physics
+open MBPlat.Input
 
 type PlatformerGame () as x =
     inherit Game()
@@ -13,10 +16,10 @@ type PlatformerGame () as x =
     let mutable spriteBatch = Unchecked.defaultof<SpriteBatch>
  
     let CreateActor' = CreateActor x.Content
-    let WorldObjects = lazy ([("player.png", Player(Nothing), Vector2(10.f, 28.f), Vector2(32.f, 32.f), false);
-                              ("obstacle.png", Obstacle, Vector2(10.f, 60.f), Vector2(32.f, 32.f), true);
-                              ("", Obstacle, Vector2(42.f, 60.f), Vector2(32.f, 32.f), true);] 
-                             |> List.map CreateActor')
+    let mutable WorldObjects = lazy ([("player.png", Player(Nothing), Vector2(10.f, 28.f), Vector2(32.f, 32.f), false);
+                                      ("obstacle.png", Obstacle, Vector2(10.f, 60.f), Vector2(32.f, 32.f), true);
+                                      ("", Obstacle, Vector2(42.f, 60.f), Vector2(32.f, 32.f), true);] 
+                                     |> List.map CreateActor')
 
     let DrawActor (sb: SpriteBatch) (actor: WorldActor) =
         if actor.Texture.IsSome then
@@ -29,20 +32,37 @@ type PlatformerGame () as x =
         ()
  
     override x.LoadContent() =
-        do WorldObjects.Force() |> ignore
+        WorldObjects.Force() 
+            |> ignore
         ()
  
     override x.Update (gameTime) =
-        WorldObjects.Force() |> ignore
+        let AddGravity' = AddGravity gameTime
+        let current = WorldObjects.Value
+        let HandleInput' = HandleInput (Keyboard.GetState())
+        
+        WorldObjects <- lazy (current 
+                              |> List.map HandleInput'
+                              |> List.map AddGravity'
+                              |> List.map AddFriction
+                              |> HandleCollisions
+                              |> List.map ResolveVelocities)
+
+        WorldObjects.Force() 
+            |> ignore
 
         ()
  
     override x.Draw (gameTime) =
         x.GraphicsDevice.Clear Color.CornflowerBlue
+        
         let DrawActor' = DrawActor spriteBatch
+        
         spriteBatch.Begin()
+        
         WorldObjects.Value
-        |> List.iter DrawActor'
+            |> List.iter DrawActor'
+        
         spriteBatch.End()
 
         ()
