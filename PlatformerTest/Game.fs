@@ -18,7 +18,9 @@ type PlatformerGame () as x =
     let CreateActor' = CreateActor x.Content
     let mutable WorldObjects = lazy ([("player.png", Player(Nothing), Vector2(10.f, 28.f), Vector2(32.f, 32.f), false);
                                       ("obstacle.png", Obstacle, Vector2(10.f, 60.f), Vector2(32.f, 32.f), true);
-                                      ("", Obstacle, Vector2(42.f, 60.f), Vector2(32.f, 32.f), true);] 
+                                      ("obstacle.png", Obstacle, Vector2(42.f, 60.f), Vector2(32.f, 32.f), true);
+                                      ("obstacle.png", Obstacle, Vector2(74.f, 60.f), Vector2(32.f, 32.f), true);
+                                      ("obstacle.png", Obstacle, Vector2(156.f, 60.f), Vector2(32.f, 32.f), true);] 
                                      |> List.map CreateActor')
 
     let DrawActor (sb: SpriteBatch) (actor: WorldActor) =
